@@ -2,10 +2,21 @@
   "name": "brave_ai_3",
   "module": "index.ts",
   "type": "module",
+  "scripts": {
+    "start": "bun run index.ts",
+    "dev": "bun --watch index.ts"
+  },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "pretier": "^0.0.1",
+    "tsc": "^2.0.4"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0",
+    "openai": "^4.72.0",
+    "prettier": "^3.3.3"
   }
 }
