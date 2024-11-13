@@ -8,10 +8,10 @@ TaskFactory.create(Bun.argv[2] || '')
     return task.perform();
   })
   .then(() => {
-    console.info('Task completed');
+    console.info(`Task ${Bun.argv[2]} completed`);
   })
   .catch(error => {
-    console.error(`Task failed: ${error}`);
+    console.error(`Task ${Bun.argv[2]} failed: ${error}`);
     process.exit(1);
   })
   .finally(() => {

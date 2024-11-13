@@ -2,6 +2,7 @@ import * as cheerio from 'cheerio';
 import type {CheerioAPI} from 'cheerio';
 import type {ParsedContent} from '@model/webCrawler/ParsedContent.js';
 import type {WebPageContent} from '@model/webCrawler/WebPageContent';
+import prettier from 'prettier';
 
 export class WebCrawler {
   public async fetchPage(url: string): Promise<WebPageContent> {
@@ -13,12 +14,16 @@ export class WebCrawler {
       }
 
       const html = await response.text();
-      const parser = cheerio.load(html); // renamed from $
+      const parser = cheerio.load(html);
+      const prettyHtml = await prettier.format(html, {
+        parser: 'html',
+        htmlWhitespaceSensitivity: 'ignore',
+      });
 
       return {
         url,
         title: parser('title').text(),
-        html,
+        html: prettyHtml,
         parser,
       };
     } catch (error) {
