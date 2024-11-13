@@ -32,12 +32,9 @@ export class WebCrawler {
     }
   }
 
-  public async parseContent<T>(
-    url: string,
-    parser: (document: CheerioAPI) => T, // renamed parameter
-  ): Promise<ParsedContent<T>> {
+  public async parseContent<T>(url: string, parser: (document: CheerioAPI) => T): Promise<ParsedContent<T>> {
     const page = await this.fetchPage(url);
-    const data = parser(page.parser); // using new name
+    const data = parser(page.parser);
 
     return {
       url,

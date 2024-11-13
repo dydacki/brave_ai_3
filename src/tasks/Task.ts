@@ -1,7 +1,5 @@
 export abstract class Task {
-  protected constructor() {
-    // Basic constructor, can be extended if needed
-  }
+  protected constructor() {}
 
   abstract perform(): Promise<void>;
 }
