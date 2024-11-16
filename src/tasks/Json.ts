@@ -6,7 +6,7 @@ import {PromptTemplate} from '@langchain/core/prompts';
 import {WebClient} from '@clients/WebClient';
 import type {ConversationMessage as Message} from '@model/tasks/Verify';
 
-export class Verify extends Task {
+export class Json extends Task {
   private readonly chatOpenAI: ChatOpenAI;
   private readonly webClient: WebClient;
   private readonly template: string =
@@ -31,7 +31,7 @@ export class Verify extends Task {
       message = await this.exchangeMessage({text: 'READY', msgID: 0});
       //console.log('Message: ', message.text);
 
-      while (message.text.startsWith('{{}}')) {
+      while (!message.text.startsWith('{{')) {
         const question = message.text.trim();
         const answer = await this.answerQuestion(question);
         //console.log('Anserwing to robot: ', answer);
