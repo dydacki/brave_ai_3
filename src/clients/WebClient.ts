@@ -24,7 +24,7 @@ export class WebClient {
     return response.json();
   }
 
-  async post<TData extends Record<string, any>, TResponse = string>(
+  async post<TData extends Record<string, any>, TResponse = TData>(
     endpoint: string,
     data: TData,
     asUrlEncoded: boolean = false,
@@ -50,6 +50,6 @@ export class WebClient {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    return asUrlEncoded ? (response.text() as TResponse) : response.json();
+    return (asUrlEncoded ? response.text() : response.json()) as TResponse;
   }
 }
