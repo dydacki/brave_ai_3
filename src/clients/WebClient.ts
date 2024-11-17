@@ -25,12 +25,8 @@ export class WebClient {
   }
 
   async post<T extends Record<string, any>, V>(endpoint: string, data: T, asUrlEncoded: boolean = false): Promise<V> {
-    const headers: Record<string, string> = {};
-    let body: string;
-
-    headers['Content-Type'] = asUrlEncoded ? 'application/x-www-form-urlencoded' : 'application/json';
-    body = asUrlEncoded ? this.urlEncodeData(data) : JSON.stringify(data);
-
+    const headers = {'Content-Type': asUrlEncoded ? 'application/x-www-form-urlencoded' : 'application/json'};
+    const body: string = asUrlEncoded ? this.urlEncodeData(data) : JSON.stringify(data);
     const response = await fetch(this.getFullUrl(endpoint), {
       method: 'POST',
       headers,

@@ -27,8 +27,6 @@ export class Calibration extends Task {
   async perform(): Promise<void> {
     try {
       const data = await this.readJsonFile(`${import.meta.dir}/../utils/files/calibration.json`);
-
-      // Wait for all problems to be processed
       await Promise.all(
         data['test-data'].map(async problem => {
           if (this.arithmeticRegex.test(problem.question)) {
@@ -47,7 +45,6 @@ export class Calibration extends Task {
         }),
       );
 
-      // Now all async operations are complete
       const response = await this.webClient.post<Json<CalibrationData>, JsonResponse>('/report', this.createJson(data));
       console.log(response);
     } catch (error) {
