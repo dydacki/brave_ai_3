@@ -19,26 +19,17 @@ export class WebClient {
   async get<T>(endpoint: string): Promise<T> {
     const response = await fetch(this.getFullUrl(endpoint));
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(await response.text());
     }
     return response.json();
   }
 
-  async post<TData extends Record<string, any>, TResponse>(
-    endpoint: string,
-    data: TData,
-    asUrlEncoded: boolean = false,
-  ): Promise<TResponse> {
+  async post<T extends Record<string, any>, V>(endpoint: string, data: T, asUrlEncoded: boolean = false): Promise<V> {
     const headers: Record<string, string> = {};
     let body: string;
 
-    if (asUrlEncoded) {
-      headers['Content-Type'] = 'application/x-www-form-urlencoded';
-      body = this.urlEncodeData(data);
-    } else {
-      headers['Content-Type'] = 'application/json';
-      body = JSON.stringify(data);
-    }
+    headers['Content-Type'] = asUrlEncoded ? 'application/x-www-form-urlencoded' : 'application/json';
+    body = asUrlEncoded ? this.urlEncodeData(data) : JSON.stringify(data);
 
     const response = await fetch(this.getFullUrl(endpoint), {
       method: 'POST',
@@ -47,12 +38,9 @@ export class WebClient {
     });
 
     if (!response.ok) {
-      console.log(await response.text());
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(await response.text());
     }
 
-    console.log(await response.text());
-
-    return (asUrlEncoded ? response.text() : response.json()) as TResponse;
+    return (asUrlEncoded ? response.text() : response.json()) as V;
   }
 }

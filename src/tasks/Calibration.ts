@@ -25,25 +25,29 @@ export class Calibration extends Task {
   }
 
   async perform(): Promise<void> {
-    const data = await this.readJsonFile(`${import.meta.dir}/../utils/files/calibration.json`);
-    data['test-data'].forEach(async problem => {
-      if (this.arithmeticRegex.test(problem.question)) {
-        const tokens = this.mathTokenizer.tokenize(problem.question);
-        const result = this.mathTokenizer.evaluate(tokens);
-        if (result !== problem.answer) {
-          problem.answer = result;
-        }
-
-        if (problem.test && problem.test.a === '???') {
-          let answer = await this.answerQuestion(problem.test.q);
-          problem.test.a = answer.replace('.', '');
-        }
-      }
-    });
-
     try {
-      const json = this.createJson(data);
-      console.log(json);
+      const data = await this.readJsonFile(`${import.meta.dir}/../utils/files/calibration.json`);
+
+      // Wait for all problems to be processed
+      await Promise.all(
+        data['test-data'].map(async problem => {
+          if (this.arithmeticRegex.test(problem.question)) {
+            const tokens = this.mathTokenizer.tokenize(problem.question);
+            const result = this.mathTokenizer.evaluate(tokens);
+            if (result !== problem.answer) {
+              problem.answer = result;
+            }
+
+            if (problem.test && problem.test.a === '???') {
+              let answer = await this.answerQuestion(problem.test.q);
+              problem.test.a = answer.replace('.', '');
+              console.log(problem.test.q, problem.test.a);
+            }
+          }
+        }),
+      );
+
+      // Now all async operations are complete
       const response = await this.webClient.post<Json<CalibrationData>, JsonResponse>('/report', this.createJson(data));
       console.log(response);
     } catch (error) {
