@@ -1,4 +1,6 @@
 import {TaskFactory} from '@utils/TaskFactory.js';
+import {config} from 'dotenv';
+config();
 
 TaskFactory.create(Bun.argv[2] || '')
   .then(task => {

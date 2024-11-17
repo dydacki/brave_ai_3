@@ -1,7 +1,7 @@
 type Operator = '+' | '-' | '*' | '/';
 type TokenizedMath = [number, Operator, number];
 
-class MathTokenizer {
+export class MathTokenizer {
   private static readonly validOperators = new Set(['+', '-', '*', '/']);
 
   tokenize(question: string): TokenizedMath {
