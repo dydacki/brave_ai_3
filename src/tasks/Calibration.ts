@@ -5,7 +5,8 @@ import {StringOutputParser} from '@langchain/core/output_parsers';
 import {PromptTemplate} from '@langchain/core/prompts';
 import {MathTokenizer} from '@utils/tokenizers/MathTokenizer';
 import {WebClient} from '@clients/WebClient';
-import type {CalibrationData, Json, JsonResponse} from '@model/tasks/Calibration';
+import type {CalibrationData} from '@model/tasks/Calibration';
+import type {Json, JsonResponse} from '@model/tasks/Task';
 
 export class Calibration extends Task {
   private readonly arithmeticRegex: RegExp = /^\s*(\d+)\s*([+\-*/])\s*(\d+)\s*$/;

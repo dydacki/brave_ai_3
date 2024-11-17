@@ -21,7 +21,8 @@ export class WebClient {
     if (!response.ok) {
       throw new Error(await response.text());
     }
-    return response.json();
+
+    return (typeof String(new Object() as T) === 'string' ? response.text() : response.json()) as Promise<T>;
   }
 
   async post<T extends Record<string, any>, V>(endpoint: string, data: T, asUrlEncoded: boolean = false): Promise<V> {
