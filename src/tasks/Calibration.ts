@@ -4,14 +4,12 @@ import {useChatOpenAI} from '@clients/LangChainClient';
 import {StringOutputParser} from '@langchain/core/output_parsers';
 import {PromptTemplate} from '@langchain/core/prompts';
 import {MathTokenizer} from '@utils/tokenizers/MathTokenizer';
-import {WebClient} from '@clients/WebClient';
 import type {CalibrationData} from '@model/tasks/Calibration';
 import type {Json, JsonResponse} from '@model/tasks/Task';
 
 export class Calibration extends Task {
   private readonly arithmeticRegex: RegExp = /^\s*(\d+)\s*([+\-*/])\s*(\d+)\s*$/;
   private readonly chatOpenAI: ChatOpenAI;
-  private readonly webClient: WebClient;
   private readonly mathTokenizer: MathTokenizer;
   private readonly template: string =
     'Answer the question: "{question}". Return answer for the question in ENGLISH language, ' +
@@ -21,7 +19,6 @@ export class Calibration extends Task {
   constructor() {
     super();
     this.chatOpenAI = useChatOpenAI();
-    this.webClient = new WebClient('https://centrala.ag3nts.org/report');
     this.mathTokenizer = new MathTokenizer();
   }
 
@@ -65,12 +62,8 @@ export class Calibration extends Task {
     return result;
   }
 
-  private createJson(t: CalibrationData): Json<CalibrationData> {
-    t.apikey = process.env.POLYGON_API_KEY as string;
-    return {
-      task: 'JSON',
-      answer: t,
-      apikey: process.env.POLYGON_API_KEY as string,
-    };
+  protected createJson<CalibrationData>(t: CalibrationData): Json<CalibrationData> {
+    const apiKey = process.env.POLYGON_API_KEY as string;
+    return super.createJson({...t, apikey: apiKey}, 'JSON');
   }
 }

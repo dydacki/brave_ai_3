@@ -1,13 +1,11 @@
 import {Task} from './Task';
 import {ChatOpenAI} from '@langchain/openai';
 import {useChatOpenAI} from '@clients/LangChainClient';
-import {WebClient} from '@clients/WebClient';
 import type {Json, JsonResponse} from '@model/tasks/Task';
 import {StringOutputParser} from '@langchain/core/output_parsers';
 import {PromptTemplate} from '@langchain/core/prompts';
 export class Censorship extends Task {
   private readonly chatOpenAI: ChatOpenAI;
-  private readonly webClient: WebClient;
   private readonly template: string =
     'Replace the personal data in the : "{sentence}" with the word "CENZURA". The data to replace: ' +
     '1. Full name, ' +
@@ -28,14 +26,13 @@ export class Censorship extends Task {
   constructor() {
     super();
     this.chatOpenAI = useChatOpenAI();
-    this.webClient = new WebClient('https://centrala.ag3nts.org');
   }
 
   async perform(): Promise<void> {
     try {
       const content = await this.getStringToCensor();
       const censoredSentence = await this.censorSentence(content);
-      const json = this.createJson(censoredSentence);
+      const json = this.createJson(censoredSentence, 'CENZURA');
       console.log(json);
 
       const response = await this.webClient.post<Json<string>, JsonResponse>('/report', json);
@@ -43,14 +40,6 @@ export class Censorship extends Task {
     } catch (error) {
       console.error(error);
     }
-  }
-
-  private createJson(content: string): Json<string> {
-    return {
-      task: 'CENZURA',
-      answer: content,
-      apikey: process.env.POLYGON_API_KEY as string,
-    };
   }
 
   private async getStringToCensor(): Promise<string> {
