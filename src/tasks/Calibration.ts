@@ -24,7 +24,7 @@ export class Calibration extends Task {
 
   async perform(): Promise<void> {
     try {
-      const data = await this.readJsonFile(`${import.meta.dir}/../utils/files/calibration.json`);
+      const data = await this.readJsonFile(`${import.meta.dir}/../utils/files/calibration/calibration.json`);
       await Promise.all(
         data['test-data'].map(async problem => {
           if (this.arithmeticRegex.test(problem.question)) {
