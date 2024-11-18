@@ -13,7 +13,9 @@ export class OpenAiClient {
   private groq: Groq;
 
   constructor() {
-    this.openai = new OpenAI();
+    this.openai = new OpenAI({
+      apiKey: process.env.OPEN_AI_API_KEY,
+    });
     this.groq = new Groq({
       apiKey: process.env.GROQ_API_KEY,
     });
