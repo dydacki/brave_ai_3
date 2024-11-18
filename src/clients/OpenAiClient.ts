@@ -118,7 +118,7 @@ export class OpenAiClient {
     console.log('Transcribing audio...');
 
     const transcription = await this.openai.audio.transcriptions.create({
-      file: await toFile(audioBuffer, 'speech.mp3'),
+      file: await toFile(audioBuffer, 'speech.m4a'),
       language: 'pl',
       model: 'whisper-1',
     });

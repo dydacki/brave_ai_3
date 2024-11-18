@@ -30,12 +30,22 @@ export class Mp3 extends Task {
     } else {
       const files = await FileUtils.getFilesWithExtension(this.inputDir, 'm4a');
       console.log(`Found ${files.length} m4a files to process`);
-      const transcriptions = await Promise.all(
-        files.map(async file => ({
-          file: file.replace('m4a', 'txt'),
-          transcription: await this.transcribe(file),
-        })),
-      );
+      const transcriptions: {file: string; transcription: string}[] = [];
+      for (const audioFile of files) {
+        try {
+          console.log(`Processing ${files.indexOf(audioFile) + 1}/${files.length}: ${audioFile}`);
+          const transcription = await this.transcribe(audioFile);
+          const file = `${path.parse(audioFile).name}.txt`;
+          transcriptions.push({file, transcription});
+          console.log(`Successfully processed ${audioFile}`);
+        } catch (error) {
+          console.error(`Error processing ${audioFile}:`, error);
+          transcriptions.push({
+            file: audioFile,
+            transcription: '', // or handle error case as needed
+          });
+        }
+      }
 
       await this.saveTranscriptions(transcriptions);
       return transcriptions.map(t => t.transcription);
@@ -45,10 +55,12 @@ export class Mp3 extends Task {
   private async transcribe(audioFile: string): Promise<string> {
     console.log(`Transcribing ${audioFile}...`);
     const audioBuffer = await fs.readFile(path.join(this.inputDir, audioFile));
-    return this.openAiClient.transcribe(audioBuffer);
+    return this.openAiClient.transcribeGroq(audioBuffer);
   }
 
   private async saveTranscriptions(transcriptions: {file: string; transcription: string}[]): Promise<void> {
+    await fs.mkdir(this.transcriptionDir, {recursive: true});
+
     await Promise.all(
       transcriptions.map(transcription =>
         fs.writeFile(path.join(this.transcriptionDir, transcription.file), transcription.transcription),
