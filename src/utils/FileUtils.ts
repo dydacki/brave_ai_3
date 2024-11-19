@@ -2,7 +2,7 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 
 export class FileUtils {
-  static async getFilesWithExtension(directoryPath: string, extension: string): Promise<string[]> {
+  static async getFilesWithExtension(directoryPath: string, extensions: string | string[]): Promise<string[]> {
     try {
       await fs.access(directoryPath);
     } catch {
@@ -10,9 +10,13 @@ export class FileUtils {
       return [];
     }
 
+    const extensionArray = Array.isArray(extensions)
+      ? extensions.map(ext => (ext.toLowerCase().startsWith('.') ? ext.toLowerCase() : `.${ext.toLowerCase()}`))
+      : [extensions.toLowerCase().startsWith('.') ? extensions.toLowerCase() : `.${extensions.toLowerCase()}`];
+
     try {
       const files = await fs.readdir(directoryPath);
-      return files.filter(file => path.extname(file).toLowerCase() === `.${extension.toLowerCase()}`);
+      return files.filter(f => extensionArray.includes(path.extname(f).toLowerCase()));
     } catch (error) {
       console.error(`Error reading directory ${directoryPath}:`, error);
       throw error;

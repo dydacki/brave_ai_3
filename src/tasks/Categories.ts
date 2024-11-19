@@ -5,6 +5,7 @@ import {useChatOpenAI} from '@clients/LangChainClient';
 import {StringOutputParser} from '@langchain/core/output_parsers';
 import {PromptTemplate} from '@langchain/core/prompts';
 import type {ChatOpenAI} from '@langchain/openai';
+import {FileUtils} from '@utils/FileUtils';
 
 export class Categories extends Task {
   private readonly openAiClient: OpenAiClient;
@@ -25,11 +26,11 @@ export class Categories extends Task {
   }
 
   async perform(): Promise<void> {
+    const files = await this.getAllFiles();
+
+    console.log(files);
+
     try {
-      const categories = await this.analyzeCategories('some categories');
-      const json = this.createJson(categories, 'kategorie');
-      const response = await this.webClient.post<Json<string>, JsonResponse>('/report', json);
-      console.log(response);
     } catch (error) {
       console.error(error);
     }
@@ -40,5 +41,11 @@ export class Categories extends Task {
     const chain = prompt.pipe(this.chatOpenAI).pipe(new StringOutputParser());
     const result = await chain.invoke({text: text});
     return result;
+  }
+
+  private async getAllFiles(): Promise<string[]> {
+    const types = ['txt', 'mp3', 'png'];
+    const files = await FileUtils.getFilesWithExtension(`${import.meta.dir}/../utils/files/categories`, types);
+    return files.sort((a, b) => a.localeCompare(b, undefined, {sensitivity: 'base'}));
   }
 }
