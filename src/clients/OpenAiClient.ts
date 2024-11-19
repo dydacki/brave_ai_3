@@ -3,6 +3,7 @@ import type {ChatCompletionMessageParam, ChatCompletion, ChatCompletionChunk} fr
 import {createByModelName} from '@microsoft/tiktokenizer';
 import type {CreateEmbeddingResponse} from 'openai/resources/embeddings';
 import Groq from 'groq-sdk';
+import type {ImagesResponse} from 'openai/resources/images.mjs';
 
 export class OpenAiClient {
   private openai: OpenAI;
@@ -132,5 +133,33 @@ export class OpenAiClient {
       model: 'whisper-large-v3',
     });
     return transcription.text;
+  }
+
+  async generateImage(
+    prompt: string,
+    model: 'dall-e-2' | 'dall-e-3' = 'dall-e-3',
+    quality: 'standard' | 'hd' = 'standard',
+    size: '1024x1024' | '1792x1024' | '1024x1792' = '1024x1024',
+    style: 'natural' | 'vivid' = 'natural',
+    n: number = 1,
+    format: 'url' | 'b64_json' = 'url',
+    extension: 'png' | 'webp' = 'png',
+  ): Promise<ImagesResponse> {
+    try {
+      const response = await this.openai.images.generate({
+        model,
+        prompt,
+        n,
+        quality,
+        size,
+        style,
+        response_format: format,
+      });
+
+      return response;
+    } catch (error) {
+      console.error('Error generating image:', error);
+      throw error;
+    }
   }
 }
