@@ -29,9 +29,7 @@ export class RobotId extends Task {
   async perform(): Promise<void> {
     try {
       const instructions = await this.getTaskInstructions();
-      console.log(instructions.description);
       const refinedDescription = await this.refineImageDescription(instructions.description);
-      console.log('refined', refinedDescription);
       const imageResponse = await this.openAiClient.generateImage(refinedDescription);
       const imageUrl = imageResponse.data[0].url as string;
       console.log(imageUrl);
