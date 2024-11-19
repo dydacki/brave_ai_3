@@ -137,7 +137,7 @@ export class OpenAiClient {
 
   async generateImage(
     prompt: string,
-    model: 'dall-e-2' | 'dall-e-3' = 'dall-e-3',
+    model: 'dall-e-2' | 'dall-e-3' = 'dall-e-2',
     quality: 'standard' | 'hd' = 'standard',
     size: '1024x1024' | '1792x1024' | '1024x1792' = '1024x1024',
     style: 'natural' | 'vivid' = 'natural',
