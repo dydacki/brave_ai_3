@@ -27,6 +27,7 @@
     "paths": {
       "@model/*": ["src/model/*"],
       "@clients/*": ["src/clients/*"],
+      "@services/*": ["src/services/*"],
       "@tasks/*": ["src/tasks/*"],
       "@utils/*": ["src/utils/*"]
     }

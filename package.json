@@ -6,7 +6,8 @@
     "@model/*": "./src/model/*",
     "@client/*": "./src/client/*",
     "@tasks/*": "./src/tasks/*",
-    "@utils/*": "./src/utils/*"
+    "@utils/*": "./src/utils/*",
+    "@services/*": "./src/services/*"
   },
   "scripts": {
     "start": "bun run index.ts",
@@ -22,6 +23,7 @@
   },
   "dependencies": {
     "@langchain/openai": "^0.3.13",
+    "@mendable/firecrawl-js": "^1.9.1",
     "@microsoft/tiktokenizer": "^1.0.9",
     "cheerio": "^1.0.0",
     "dotenv": "^16.4.5",

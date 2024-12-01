@@ -33,4 +33,15 @@ export class FileUtils {
       throw error;
     }
   }
+
+  static async saveBuffer(buffer: Buffer, outputPath: string, filename: string): Promise<void> {
+    try {
+      await fs.mkdir(outputPath, {recursive: true});
+      const fullPath = path.join(outputPath, filename);
+      await fs.writeFile(fullPath, Buffer.from(buffer));
+    } catch (error) {
+      console.error('Error saving buffer:', error);
+      throw error;
+    }
+  }
 }

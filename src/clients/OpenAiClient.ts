@@ -190,4 +190,32 @@ export class OpenAiClient {
       throw error;
     }
   }
+
+  async interpretImage(imageBuffer: Buffer): Promise<string> {
+    try {
+      const response = await this.openai.chat.completions.create({
+        model: 'gpt-4o',
+        messages: [
+          {
+            role: 'system',
+            content:
+              'You are a helpful assistant that can analyze images. Please describe what you see in detail. Reply in Polish.',
+          },
+          {
+            role: 'user',
+            content: [
+              {type: 'text', text: 'What do you see in this image? Describe it in detail. Reply in Polish.'},
+              {type: 'image_url', image_url: {url: `data:image/png;base64,${imageBuffer.toString('base64')}`}},
+            ],
+          },
+        ],
+        max_tokens: 500,
+      });
+
+      return response.choices[0].message.content || '';
+    } catch (error) {
+      console.error('Error interpreting image:', error);
+      throw error;
+    }
+  }
 }

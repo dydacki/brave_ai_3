@@ -16,13 +16,19 @@ export class WebClient {
       .join('&');
   }
 
-  async get<T>(endpoint: string): Promise<T> {
+  async get<T>(endpoint: string, responseType: 'buffer' | 'string' | 'json' = 'json'): Promise<T> {
     const response = await fetch(this.getFullUrl(endpoint));
     if (!response.ok) {
       throw new Error(await response.text());
     }
 
-    return (typeof String(new Object() as T) === 'string' ? response.text() : response.json()) as Promise<T>;
+    if (responseType === 'buffer') {
+      return response.arrayBuffer() as Promise<T>;
+    } else if (responseType === 'string') {
+      return response.text() as Promise<T>;
+    } else {
+      return response.json() as Promise<T>;
+    }
   }
 
   async post<T extends Record<string, any>, V>(endpoint: string, data: T, asUrlEncoded: boolean = false): Promise<V> {
