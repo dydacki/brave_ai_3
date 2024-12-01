@@ -31,16 +31,7 @@ export class Arxiv extends Task {
   async perform(): Promise<void> {
     try {
       const questions = await this.getQuestions();
-      const response: ArxivResponse = {
-        '01': '',
-        '02': '',
-        '03': '',
-        '04': '',
-        '05': '',
-      };
-
       const webContent = await this.scrapingService.scrapeUrl(this.webUrl);
-      console.log(webContent);
 
       if (webContent) {
         const imageResourceIds = this.getImageResources(webContent.content);
@@ -57,6 +48,7 @@ export class Arxiv extends Task {
           webContent.content = webContent.content.replace(resource, `Transkrypcja audio: ${result}`);
         }
 
+        const response: ArxivResponse = this.newResponse();
         for (const [id, question] of questions) {
           const result = await this.invoke(webContent.content, question);
           console.log(`Result for question ${id}: ${result}`);
@@ -115,5 +107,15 @@ export class Arxiv extends Task {
     const audioRegex = /i\/[^"\s]+\.mp3/g;
     const matches = webContent.match(audioRegex) || [];
     return [...new Set(matches)]; // Remove duplicates
+  }
+
+  private newResponse(): ArxivResponse {
+    return {
+      '01': '',
+      '02': '',
+      '03': '',
+      '04': '',
+      '05': '',
+    };
   }
 }
