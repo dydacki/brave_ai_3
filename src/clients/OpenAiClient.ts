@@ -162,4 +162,32 @@ export class OpenAiClient {
       throw error;
     }
   }
+
+  async readImageText(imageBuffer: Buffer): Promise<string> {
+    try {
+      const base64Image = imageBuffer.toString('base64');
+      const response = await this.openai.chat.completions.create({
+        model: 'gpt-4o',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a helpful assistant that can answer questions and help with tasks.',
+          },
+          {
+            role: 'user',
+            content: [
+              {type: 'text', text: 'What text do you see in this image? Return only the text content.'},
+              {type: 'image_url', image_url: {url: `data:image/png;base64,${base64Image}`}},
+            ],
+          },
+        ],
+        max_tokens: 500,
+      });
+
+      return response.choices[0].message.content || '';
+    } catch (error) {
+      console.error('Error reading image text:', error);
+      throw error;
+    }
+  }
 }
