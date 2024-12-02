@@ -4,13 +4,11 @@ import {ChatOpenAI} from '@langchain/openai';
 import {useChatOpenAI} from '@clients/LangChainClient';
 import {StringOutputParser} from '@langchain/core/output_parsers';
 import {PromptTemplate} from '@langchain/core/prompts';
-import {WebClient} from '@clients/WebClient';
 import type {LoginData} from '@model/tasks/AntyCaptcha';
 
 export class AntyCaptcha extends Task {
   private readonly chatOpenAI: ChatOpenAI;
   private readonly webCrawler: WebCrawler;
-  private readonly webClient: WebClient;
   private readonly template: string =
     'Answer the question: "{question}". Return answer for the question in POLISH language, ' +
     'Be precise and concise. Answer in one sentence, with as few words as possible. Answer:';
@@ -22,7 +20,6 @@ export class AntyCaptcha extends Task {
     super();
     this.chatOpenAI = useChatOpenAI();
     this.webCrawler = new WebCrawler();
-    this.webClient = new WebClient('https://xyz.ag3nts.org');
   }
 
   async perform(): Promise<void> {
