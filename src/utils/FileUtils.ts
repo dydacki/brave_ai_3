@@ -44,4 +44,13 @@ export class FileUtils {
       throw error;
     }
   }
+
+  static async readFileContent(filePath: string, encoding: BufferEncoding = 'utf8'): Promise<string> {
+    try {
+      return await fs.readFile(filePath, encoding);
+    } catch (error) {
+      console.error(`Error reading file ${filePath}:`, error);
+      throw error;
+    }
+  }
 }

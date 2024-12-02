@@ -3,12 +3,10 @@ import {ChatOpenAI} from '@langchain/openai';
 import {useChatOpenAI} from '@clients/LangChainClient';
 import {StringOutputParser} from '@langchain/core/output_parsers';
 import {PromptTemplate} from '@langchain/core/prompts';
-import {WebClient} from '@clients/WebClient';
 import type {ConversationMessage as Message} from '@model/tasks/Verify';
 
 export class Verify extends Task {
   private readonly chatOpenAI: ChatOpenAI;
-  private readonly webClient: WebClient;
   private readonly template: string =
     'You are trying to trick a robot that wants to check if you are a robot. ' +
     'Answer the question: "{question}". Return answer for the question in ENGLISH language. ' +
@@ -22,7 +20,6 @@ export class Verify extends Task {
   constructor() {
     super();
     this.chatOpenAI = useChatOpenAI();
-    this.webClient = new WebClient('https://xyz.ag3nts.org');
   }
 
   async perform(): Promise<void> {

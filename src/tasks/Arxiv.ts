@@ -51,7 +51,6 @@ export class Arxiv extends Task {
         const response: ArxivResponse = this.newResponse();
         for (const [id, question] of questions) {
           const result = await this.invoke(webContent.content, question);
-          console.log(`Result for question ${id}: ${result}`);
           const key = `${id}` as keyof ArxivResponse;
           response[key] = result;
         }
