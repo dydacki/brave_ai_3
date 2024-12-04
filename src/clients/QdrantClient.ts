@@ -1,26 +1,23 @@
 import {QdrantClient} from '@qdrant/js-client-rest';
+import {OpenAiClient} from './OpenAiClient';
+import {type Point} from '@model/tasks/Vectors';
 
 export class QuadrantClient {
   private qdrant: QdrantClient;
+  private openAiClient: OpenAiClient;
 
   constructor(url: string) {
     this.qdrant = new QdrantClient({url: url});
+    this.openAiClient = new OpenAiClient();
   }
 
-  async findCollection(collectionName: string): Promise<{name: string} | undefined> {
-    const result = await this.qdrant.getCollections();
-    return result.collections.find(collection => collection.name === collectionName);
-  }
-
-  async tryCreateCollection(collectionName: string): Promise<{name: string} | undefined> {
+  async ensureCollection(collectionName: string): Promise<{name: string} | undefined> {
     try {
       let collection = await this.findCollection(collectionName);
       if (!collection) {
         await this.qdrant.createCollection(collectionName, {
-          vectors: {size: 1536, distance: 'Cosine', on_disk: true},
+          vectors: {size: 3072, distance: 'Cosine'},
         });
-
-        collection = await this.findCollection(collectionName);
       }
 
       return collection;
@@ -30,40 +27,45 @@ export class QuadrantClient {
     }
   }
 
-  async upsertBatch(collectionName: string, data: any[]) {
-    const dataChunks = [];
-    if (data.length > 1000) {
-      for (let i = 0; i < data.length; i += 1000) {
-        dataChunks.push(data.slice(i, i + 1000));
-      }
-    }
+  async upsert(collectionName: string, data: Point[]): Promise<void> {
+    const pointsToUpsert = await Promise.all(
+      data.map(async point => {
+        const embedding = await this.openAiClient.createEmbedding(point.text);
+        return {
+          id: point.id,
+          vector: embedding,
+          payload: {text: point.text, fileName: point.fileName},
+        };
+      }),
+    );
 
-    for (const chunk of dataChunks) {
-      await this.qdrant.upsert(collectionName, {
-        wait: true,
-        batch: {
-          ids: chunk.map(point => point.id),
-          vectors: chunk.map(point => point.vector),
-          payloads: chunk.map(point => point.payload),
-        },
-      });
+    for (const point of pointsToUpsert) {
+      try {
+        await this.qdrant.upsert(collectionName, {wait: true, points: [point]});
+      } catch (error) {
+        console.error('Error upserting point:', error);
+        throw error;
+      }
     }
   }
 
-  async searchCollection(collectionName: string, queryEmbedding: number[], limit: number) {
+  async ensureDeleted(collectionName: string): Promise<void> {
+    const collection = await this.findCollection(collectionName);
+    if (collection) {
+      await this.qdrant.deleteCollection(collectionName);
+    }
+  }
+
+  private async findCollection(collectionName: string): Promise<{name: string} | undefined> {
+    const result = await this.qdrant.getCollections();
+    return result.collections.find(collection => collection.name === collectionName);
+  }
+
+  async performSearch(collectionName: string, queryEmbedding: number[], limit: number = 1): Promise<any[]> {
     return this.qdrant.search(collectionName, {
       vector: queryEmbedding,
-      limit: limit,
-      filter: {
-        must: [
-          {
-            key: 'source',
-            match: {
-              value: collectionName,
-            },
-          },
-        ],
-      },
+      limit,
+      with_payload: true,
     });
   }
 }
