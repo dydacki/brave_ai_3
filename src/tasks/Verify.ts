@@ -26,14 +26,11 @@ export class Verify extends Task {
     let message: Message;
     try {
       message = await this.exchangeMessage({text: 'READY', msgID: 0});
-      //console.log('Message: ', message.text);
-
       while (!message.text.startsWith('{{')) {
         const question = message.text.trim();
         const answer = await this.answerQuestion(question);
-        //console.log('Anserwing to robot: ', answer);
         message = await this.exchangeMessage({text: answer, msgID: message.msgID});
-        //console.log('Message: ', message.text);
+        console.log('Message: ', message.text);
       }
     } catch (error) {
       console.error(error);

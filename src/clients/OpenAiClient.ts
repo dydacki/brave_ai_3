@@ -1,5 +1,10 @@
 import OpenAI, {toFile} from 'openai';
-import type {ChatCompletionMessageParam, ChatCompletion, ChatCompletionChunk} from 'openai/resources/chat/completions';
+import type {
+  ChatCompletionMessageParam,
+  ChatCompletion,
+  ChatCompletionChunk,
+  ChatCompletionTool,
+} from 'openai/resources/chat/completions';
 import {createByModelName} from '@microsoft/tiktokenizer';
 import type {CreateEmbeddingResponse} from 'openai/resources/embeddings';
 import Groq from 'groq-sdk';
@@ -67,6 +72,57 @@ export class OpenAiClient {
     } catch (error) {
       console.error('Error in OpenAI completion:', error);
       throw error;
+    }
+  }
+
+  async completionWithFunctions<TFunctionResult = any>(config: {
+    messages: ChatCompletionMessageParam[];
+    model?: string;
+    stream?: boolean;
+    temperature?: number;
+    jsonMode?: boolean;
+    maxTokens?: number;
+    functions: ChatCompletionTool[];
+    functionCallbacks: Record<string, (args: any) => Promise<TFunctionResult>>;
+  }): Promise<TFunctionResult> {
+    //}): Promise<ChatCompletion | AsyncIterable<ChatCompletionChunk>> {
+    const {messages, model = 'gpt-4o', stream = false, jsonMode = false, maxTokens = 4096, temperature = 0} = config;
+    let currentMessages = [...messages];
+
+    while (true) {
+      try {
+        const chatCompletion = await this.openai.chat.completions.create({
+          messages: currentMessages,
+          model,
+          tools: config.functions,
+          tool_choice: 'auto',
+          temperature,
+          max_tokens: maxTokens,
+        });
+
+        const message = chatCompletion.choices[0].message;
+        currentMessages.push(message);
+        if (!message.tool_calls) {
+          return message.content as TFunctionResult;
+        }
+
+        for (const toolCall of message.tool_calls) {
+          const functionName = toolCall.function.name;
+          const functionArgs = JSON.parse(toolCall.function.arguments);
+
+          console.log(`Calling ${functionName} with args:`, functionArgs);
+          const functionResult = await config.functionCallbacks[functionName](functionArgs);
+          console.log(`${functionName} result:`, functionResult);
+          currentMessages.push({
+            role: 'tool',
+            tool_call_id: toolCall.id,
+            content: JSON.stringify(functionResult),
+          });
+        }
+      } catch (error) {
+        console.error('Error in OpenAI completion:', error);
+        throw error;
+      }
     }
   }
 
