@@ -85,7 +85,6 @@ export class OpenAiClient {
     functions: ChatCompletionTool[];
     functionCallbacks: Record<string, (args: any) => Promise<TFunctionResult>>;
   }): Promise<TFunctionResult> {
-    //}): Promise<ChatCompletion | AsyncIterable<ChatCompletionChunk>> {
     const {messages, model = 'gpt-4o', stream = false, jsonMode = false, maxTokens = 4096, temperature = 0} = config;
     let currentMessages = [...messages];
 
