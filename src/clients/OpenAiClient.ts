@@ -100,6 +100,8 @@ export class OpenAiClient {
         });
 
         const message = chatCompletion.choices[0].message;
+
+        console.log(message);
         currentMessages.push(message);
         if (!message.tool_calls) {
           return message.content as TFunctionResult;
@@ -109,6 +111,7 @@ export class OpenAiClient {
           const functionName = toolCall.function.name;
           const functionArgs = JSON.parse(toolCall.function.arguments);
 
+          console.log('----- BEGIN LOGGING A SINGLE TOOL CALL -----');
           console.log(`Calling ${functionName} with args:`, functionArgs);
           const functionResult = await config.functionCallbacks[functionName](functionArgs);
           console.log(`${functionName} result:`, functionResult);
@@ -117,6 +120,8 @@ export class OpenAiClient {
             tool_call_id: toolCall.id,
             content: JSON.stringify(functionResult),
           });
+
+          console.log('----- END LOGGING A SINGLE TOOL CALL -----');
         }
       } catch (error) {
         console.error('Error in OpenAI completion:', error);
@@ -270,6 +275,35 @@ export class OpenAiClient {
       return response.choices[0].message.content || '';
     } catch (error) {
       console.error('Error interpreting image:', error);
+      throw error;
+    }
+  }
+
+  async interpretImageWithInstructions(imageBuffer: Buffer, instructions: string): Promise<string> {
+    const messages = [
+      {
+        role: 'user',
+        content: [
+          {type: 'text', text: instructions},
+          {type: 'image_url', image_url: {url: `data:image/png;base64,${imageBuffer.toString('base64')}`}},
+        ],
+      },
+      {
+        role: 'system',
+        content: 'You are a helpful assistant that can analyze images. Please describe what you see in detail.',
+      },
+    ] as ChatCompletionMessageParam[];
+
+    try {
+      const response = await this.openai.chat.completions.create({
+        messages,
+        model: 'gpt-4o',
+        max_tokens: 500,
+      });
+
+      return response.choices[0].message.content || '';
+    } catch (error) {
+      console.error('Error interpreting image with instructions:', error);
       throw error;
     }
   }
