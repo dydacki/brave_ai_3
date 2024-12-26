@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@langchain/openai": "^0.3.13",
-    "@mendable/firecrawl-js": "^1.9.1",
+    "@mendable/firecrawl-js": "^1.10.1",
     "@microsoft/tiktokenizer": "^1.0.9",
     "@qdrant/qdrant-js": "^1.12.0",
     "cheerio": "^1.0.0",
