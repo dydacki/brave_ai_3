@@ -32,7 +32,7 @@ export class Research extends Task {
 
   private async sendResponse<T>(arg: any): Promise<void> {
     const json = this.createJson<T>(arg, 'research');
-    const taskResponse = await this.webClient.post<Json<string>, JsonResponse>('/report', json);
+    const taskResponse = await this.webClient.post<Json<T>, JsonResponse>('/report', json);
     console.log(taskResponse);
   }
 
