@@ -24,6 +24,14 @@ export class Webhook extends Task {
   }
 
   async perform(): Promise<void> {
+    const responseObject = this.createJson<string>('awsUrl', 'webhook');
+    console.log(responseObject);
+
+    const response = await this.webClient.post<Json<string>, any>('/report', responseObject);
+    console.log(response);
+  }
+
+  async testPrompt(): Promise<void> {
     for (const instruction of this.instructions) {
       const messages = this.completionMessages(instruction);
       const result = (await this.openAiClient.completion({messages})) as ChatCompletion;
